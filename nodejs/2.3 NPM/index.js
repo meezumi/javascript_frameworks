@@ -1,4 +1,4 @@
-// USING COMMOMJS
+// USING COMMONJS
 
 // var generate_name = require("sillyname");
 // var sillyName = generate_name();

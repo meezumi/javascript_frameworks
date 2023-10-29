@@ -1,0 +1,9 @@
+what makes an API restfull? 
+it uses standard http methods: get, post, put, patch, delete
+it should have a std data format it responds with, json for say.
+clients and servers are comppletly separate, hence independence.
+statelessness - all the information is transferred from one side to the other.
+rest api is resource based. (Universal Resource Locator)
+an example can be internet.
+
+

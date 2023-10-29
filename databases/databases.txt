@@ -1,0 +1,13 @@
+data is stored in the form of tables, also known as relational database, since its easy to link two databases together, a relation.
+example - oracle
+better in relationships, structure
+
+noSQL better, updating changes in the existing database is easy. 
+mongoDB, dynamoDB - amazon
+
+turns out mondoDB is not so great anymore and postgresql is more widely used among the professional programmers.
+
+if you wanna learn more about mondoDB and mongoose
+
+https://appbrewery.com/courses/legacy-complete-web-development-course/lectures/46570233 
+

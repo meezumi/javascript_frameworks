@@ -1,0 +1,15 @@
+# first start the server using:
+mongod
+
+# then open a new terminal and use:
+mongo
+
+# this opens the mongo shell
+
+# now:
+show dbs
+
+use <nameofdb>
+
+
+ 

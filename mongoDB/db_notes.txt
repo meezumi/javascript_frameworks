@@ -11,5 +11,9 @@ show dbs
 
 use <nameofdb>
 
+show collections 
 
+db.collection.find() 
+
+to print all of the entries
  

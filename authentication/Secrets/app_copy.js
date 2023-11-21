@@ -8,12 +8,12 @@
 
 // https://www.passportjs.org/tutorials/password/ documentation for passport.js
 
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose"); // lvl1 - login
-const encrypt = require("mongoose-encryption"); // lvl2 
+const encrypt = require("mongoose-encryption"); // lvl2
 const md5 = require("md5"); // lvl3
 const bcrypt = require("bcrypt"); // lvl4
 const saltRounds = 10; // setting the number of rounds for salting
@@ -23,19 +23,14 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 
-// lvl6 onwards ->
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const findOrCreate = require("mongoose-findorcreate")
-
-
 // LEVELS OF AUTHENTICATION:
 
 // LEVEL 1 - username and password to identify user
 // LEVEL 2 - Database encrytion so the password or other details are not visible as plain site
-// LEVEL 3 - hashing passwords 
+// LEVEL 3 - hashing passwords
 // LEVEL 4 - hashing and salting, salting refers to adding a random set of characters, adding to the hash function and then puts through the hash function.
 // LEVEL 5 - using the npm package passport
-// LEVEL 6 - O Auth (using third-party(widely used) authentication)
+// LEVEL 6 - O Auth (using third-party authentication)
 
 console.log(process.env.SECRET);
 
@@ -43,17 +38,21 @@ const app = express();
 const port = 3000;
 
 app.use(express.static("public"));
-app.set('view engine', 'ejs');
-app.use(bodyParser. urlencoded({
-  extended: true
-}));
+app.set("view engine", "ejs");
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
- // ################### for lvl 5 ##########################
-app.use(session({
-  secret: "wewilllatersetthisin.env",
-  resave: false,
-  saveUninitialized: false
-}));
+// ################### for lvl 5 ##########################
+app.use(
+  session({
+    secret: "wewilllatersetthisin.env",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use(passport.initialize()); // we using app to simply initialize passport //
 app.use(passport.session()); // to tell the app to setup a session which we gave some intial configuration just above.
@@ -61,27 +60,23 @@ app.use(passport.session()); // to tell the app to setup a session which we gave
 
 // this is to connect to the server, so first we have to start the server.
 // to start  the server we use: mongod in the terminal, then
-mongoose.connect("mongodb://127.0.0.1/userDB"); 
-// mongoose.set("useCreateIndex", true); // deprecation error //
+mongoose.connect("mongodb://127.0.0.1/userDB");
+mongoose.set("useCreateIndex", true); // deprecation error //
 // const userSchema = ({
 //   email: String,
 //   password: String
-// });  this is just the basic one(simple js object) for level 1, now we will upgrade it for level 2 auth. 
+// });  this is just the basic one(simple js object) for level 1, now we will upgrade it for level 2 auth.
 
-const userSchema = new mongoose.Schema ({
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-  googleId: String,
-  secret: String
   // now its an object created from object schema class
 });
 
 userSchema.plugin(passportLocalMongoose); // to hash and salt our passwords into out db.
 
-userSchema.plugin(findOrCreate); // adding this to our schema as plugin 
-
-// const secret = "Thisisourlittlesecret."; 
-// later we will use this as the environment variables 
+// const secret = "Thisisourlittlesecret.";
+// later we will use this as the environment variables
 
 // ############################################# //
 
@@ -94,77 +89,29 @@ userSchema.plugin(findOrCreate); // adding this to our schema as plugin
 
 const User = new mongoose.model("User", userSchema);
 
-// passport.use(User.createStatergy());
+passport.use(User.createStatergy());
 
-passport.serializeUser(function (user, cb) {
-  process.nextTick(function () {
-    return cb(null, {
-      id: user.id,
-      username: user.username,
-      picture: user.picture,
-    });
-  });
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.get("/", function (req, res) {
+  res.render("home");
 });
-
-passport.deserializeUser(function (user, cb) {
-  process.nextTick(function () {
-    return cb(null, user);
-  });
-});
-
-passport.use(new GoogleStrategy({
-      clientID: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/secrets",
-      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
-      // this just tells us that we will retrieve data of the user from their userinfo, since its always gonna be there.
-    },
-    function (accessToken, refreshToken, profile, cb) {
-      console.log(profile);
-      User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        return cb(err, user);
-      });
-    }
-  )
-);
-
-
-// through facebook now ->
-
-
-app.get("/", function(req, res){
-    res.render("home");
-});
-
-// -- to authenticate user with google -- read the passport documentation
-app.get("/auth/google",
-  passport.authenticate("google", { scope: ["profile"] }));
-
-app.get(
-  "/auth/google/secrets",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  function (req, res) {
-    // Successful authentication, redirect home.
-    res.redirect("/secrets");
-  }
-);
-
-// --
 
 app.get("/login", function (req, res) {
   res.render("login");
 });
 
-// // uncomment from here for lvl1-4 
+// // uncomment from here for lvl1-4
 // app.post("/login", function(req, res){
 //   const username = req.body.username;
-//   // const password = req.body.password; for lvl1, lvl2 and lvl4 
+//   // const password = req.body.password; for lvl1, lvl2 and lvl4
 //   // const password = md5(req.body.password); for hashing (lvl3)
 //   const password = req.body.password;
 
-//   User.findOne({email: username}, function (err, foundUser){  
+//   User.findOne({email: username}, function (err, foundUser){
 //     if(err){
-//       console.log(err) 
+//       console.log(err)
 //     } else {
 //       if(foundUser) {
 //         // if (foundUser.password === password){
@@ -181,7 +128,7 @@ app.get("/login", function (req, res) {
 //           }
 //         });
 //         // #################################### //
-//       } 
+//       }
 //     }
 //   });
 
@@ -229,93 +176,56 @@ app.get("/register", function (req, res) {
 
 // });
 
-app.get("/secrets", function(req, res){
-  User.find({"secrets": {$ne: null}}, function(err, foundUser){
-    if (err) {
-      console.log(err);
-    } else {
-      if (foundUser) {
-        res.render("secrets", {usersWithSecrets: foundUsers});
-      }
-    }
-  }); // through all the users, pick out the onces where the secret field is ne (not equal) to null.
-  // if (req.isAuthenticated()){
-  //   res.render("secrets");
-  // } else {
-  //   res.redirect("/login");
-  // }
-});
-
-app.get("/submit", function(req, res){
+app.get("/secrets", function (req, res) {
   if (req.isAuthenticated()) {
-    res.render("secrets");
+    req.render("secrets");
   } else {
     res.redirect("/login");
   }
 });
 
-app.post("/submit", function(req, res){
-  const submittedSecret = req.body.secret;
-
-  console.log(req.user.id);
-
-  User.findById(req.user.id, function(err, foundUser){
-    if (err){
-      console.log(err);
-    } else {
-      if (foundUser) {
-        foundUser.secret = submittedSecret;
-        foundUser.save(function(){
-          res.redirect("/secrets");
-        });
-      }
-    }
-  })
-
-})
-
-
-app.get("/logout", function(req, res){
+app.get("/logout", function (req, res) {
   req.logout();
   res.redirect("/");
 });
 
-
-app.post("/register", function(req, res) {
-  User.register({username: req.body.username}, req.body.password, function(err, user){
-    if (err) {
-      console.log(err);
-      res.redirect("/register");
-    } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/secrets");
-      })
+app.post("/register", function (req, res) {
+  User.register(
+    { username: req.body.username },
+    req.body.password,
+    function (err, user) {
+      if (err) {
+        console.log(err);
+        res.redirect("/register");
+      } else {
+        passport.authenticate("local")(req, res, function () {
+          res.redirect("/secrets");
+        });
+      }
     }
-  })
+  );
 });
 
-app.post("/login", function(req, res){
+app.post("/login", function (req, res) {
   const user = new User({
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
   });
 
-  req.login(user, function(err){
+  req.login(user, function (err) {
     if (err) {
       console.log(err);
     } else {
-      passport.authenticate("local")(req, res, function(){
+      passport.authenticate("local")(req, res, function () {
         res.render("/secrets");
       });
     }
   });
 });
 
-
-app.listen(port, function(){
-  console.log("server up and running at port: 3000" )
-})
-
+app.listen(port, function () {
+  console.log("server up and running at port: 3000");
+});
 
 // auth code - you use it once kinda thingie(admin one)
-// access token - it may be an year pass 
+// access token - it may be an year pass

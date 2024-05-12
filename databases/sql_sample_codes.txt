@@ -4,3 +4,11 @@ INNER JOIN customers ON customer_id = customers.id
 
 superuser - postgres
 password -
+
+
+total sample 212 
+ 
+                       actually positive (1)  actually negative (0)
+
+predicted positive (1)         88                     10
+predicted negative (0)         17                     97

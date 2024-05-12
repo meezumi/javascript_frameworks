@@ -1,0 +1,9 @@
+Fonts used in this design:
+
+Font: Quicksand
+Author: Andrew Paglinawan
+Url: https://fonts.google.com/specimen/Quicksand
+
+Font: Homemade Apple
+Author: Font Diner
+Url: https://fonts.google.com/specimen/Homemade+Apple
